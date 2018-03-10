@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+</head>
+<body>
+<style>
+body { margin:0px;}
+</style>
+
+<script src="visuals-apps.js"></script>
+<script src="visuals-events.js"></script>
+<script src="visuals-dom.js"></script>
+<script src="visuals-layout.js"></script>
+
+
+<div id="fst">First</div>
+<div class="sec">Second</div>
+
+<!--<div style="border: 1px solid #000000;padding: 10px;">-->
+<div id="row1" style="border: 0px solid #cccccc;">
+  <div>1</div>   
+  <div>2</div>   
+  <div>3</div>   
+  <div>4</div>
+</div>
+<!--</div>-->
+
+<style>
+#row1 div {
+  background-color: #cccccc;
+}
+</style>
+
+
+<script>
+var v = {};
+apps(v);
+events(v);
+dom(v);
+layout(v);
+
+v.apps.add("myapp");
+
+var elid = v.evt.events.on("x", (o)=>{
+	console.log("event: " + o);
+});
+
+v.evt.events.ev("x", "hey");
+v.evt.events.ev("x", "gone");
+
+v.evt.intents.on("open", (o,e)=> { console.log("intent: " + o + " - " + e)});
+v.evt.intents.ev("open", "data");
+
+
+var div = v.dom.el("div");
+console.log(div);
+
+var text = v.dom.txt("Hello world");
+console.log(text);
+
+v.dom.append(div, text);
+console.log(div);
+
+var text2 = v.dom.txt("Another node");
+v.dom.append(div,text2);
+console.log(div);
+
+console.log(v.dom.q("div"));
+console.log(v.dom.qcl("sec"));
+console.log(v.dom.qid("fst"));
+
+
+v.dom.on(v.dom.qid("fst"), "mouseover", (e)=>{ console.log("mouse over"); });
+
+v.layout.rows([
+	{ el : v.dom.qid("row1"), widths : ["100%", "100%", "100%", "100%", "1200"], cells: [{colwidths : [12, 6, 6, 6, 3]},{colwidths : [12, 6, 6, 6, 3]},{colwidths : [12, 6, 6, 6, 3]},{colwidths : [12, 6, 6, 6, 3]}]  }
+]);
+v.layout.do();
+
+</script>
+
+</body>
+</html>
