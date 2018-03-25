@@ -2,16 +2,15 @@ layout=(v)=>{
 v.layout={};
 
 v.layout.cnf = {
-	breaks   : [0, 320, 640, 960, 1280],
+	breaks   : [0, 320, 640, 960, 1200],
     colCounts: [12, 12, 12, 12, 12],
     widths   : ["100%", "100%", "100%", "100%", "1200"],
 	paddings : [8,16,16,16,24],
     spacings : [8,16,16,16,32]
 }
 
-
 v.layout.conf=(cnf)=>{ v.layout.cnf = cnf; }
-v.layout.rows=(rws)=>{ 
+v.layout.rows=(rws)=>{
 	v.layout.rws = rws;
     for(var i=0; i<rws.length; i++){
 		/* remove white space text nodes */
@@ -30,7 +29,7 @@ v.layout.rows=(rws)=>{
 		for(var k=0;k<min;k++) {
 			rws[i].cells[k].el = kids[k];
 		}
-		
+
 		/* transfer default conf to row */
 		if(!rws[i].breaks){ rws[i].breaks = v.layout.cnf.breaks; }
 		if(!rws[i].colCounts) { rws[i].colCounts = v.layout.cnf.colCounts; }
@@ -38,8 +37,6 @@ v.layout.rows=(rws)=>{
 		if(!rws[i].paddings){ rws[i].paddings = v.layout.cnf.paddings; }
 		if(!rws[i].spacings){ rws[i].spacings = v.layout.cnf.spacings; }
 	}
-	
-	
 }
 
 v.layout.do=()=> {
@@ -56,12 +53,24 @@ v.layout.do=()=> {
 
 		/* calculate row's column boundaries */
 		var colCount = row.colCounts[wi];
-		
+
 		var spacing = row.spacings[wi];
-		var rowWidth = (row.el.parentElement ? row.el.parentElement.offsetWidth : window.innerWidth)
-			- row.paddings[wi] * 2
-			+ spacing;
-		
+		var parentWidth = row.el.parentElement ? row.el.parentElement.offsetWidth : window.innerWidth;
+		var rowWidthStr = row.widths[wi];
+
+		var fullRowWidth = 0;
+		if(rowWidthStr.endsWith("%")) {
+		    var perc = parseFloat(rowWidthStr.substring(0, rowWidthStr.length-1)) / 100;
+            fullRowWidth = parentWidth * perc;
+		} else {
+		    fullRowWidth = parseInt(rowWidthStr, 10);
+		}
+		row.el.style.width = "" + fullRowWidth + "px";
+
+        console.log("fullRowWidth", fullRowWidth);
+		//var rowWidth = parentWidth - row.paddings[wi] * 2 + spacing;
+		var rowWidth = fullRowWidth - row.paddings[wi] * 2 + spacing;
+
 		var colBounds  = new Array(colCount + 1);
 
 		for(var i=0; i < colCount; i++){
@@ -75,14 +84,14 @@ v.layout.do=()=> {
             prevEnd: rowWidth - Math.floor(spacing / 2),
             boundary  : rowWidth
         };
-		
+
 		/* apply row's column boundaries to row cell elements */
 		var fromCol = 0;
 		for(var i=0; i<row.cells.length; i++) {
 			var toCol = fromCol + row.cells[i].colwidths[wi];
 			var cellWidth = colBounds[toCol].prevEnd - colBounds[fromCol].nextBegin;
-			
-			row.cells[i].el.style = "display: inline-block; box-sizing: border-box; "
+
+			row.cells[i].el.style = "display: inline-block; box-sizing: border-box; vertical-align: top;"
 			    + (cellWidth > 0 ? "width: " + cellWidth + "px; " : "display: none;")
 			    + "margin-left: " + (fromCol == 0 ? row.paddings[wi] : row.spacings[wi]) + "px";
 
